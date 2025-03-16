@@ -20,8 +20,8 @@ public class Storage {
 	protected ConcurrentHashMap<String, ClientSession> clients;
 
 	public Storage() {
-		subscriptions = new ConcurrentHashMap<String, Set<String>>();
-		clients = new ConcurrentHashMap<String, ClientSession>();
+		subscriptions = new ConcurrentHashMap<>();
+		clients = new ConcurrentHashMap<>();
 	}
 
 	public Collection<ClientSession> getSessions() {
@@ -29,7 +29,6 @@ public class Storage {
 	}
 
 	public Set<String> getTopics() {
-
 		return subscriptions.keySet();
 
 	}
@@ -38,64 +37,67 @@ public class Storage {
 	// session object can be used to send a message to the user
 	
 	public ClientSession getSession(String user) {
-
-		ClientSession session = clients.get(user);
-
-		return session;
+		return clients.get(user);
 	}
 
 	public Set<String> getSubscribers(String topic) {
-
-		return (subscriptions.get(topic));
+		return subscriptions.get(topic);
 
 	}
 
 	public void addClientSession(String user, Connection connection) {
-
 		// TODO: add corresponding client session to the storage
 		// See ClientSession class
-		
-		throw new UnsupportedOperationException(TODO.method());
+		ClientSession session = new ClientSession(user, connection);
+		clients.put(user, session);
+		Logger.log("Client session added for user: " + user);
 		
 	}
 
 	public void removeClientSession(String user) {
-
 		// TODO: disconnet the client (user) 
 		// and remove client session for user from the storage
-		
-		throw new UnsupportedOperationException(TODO.method());
+		ClientSession session = clients.remove(user);
+		if (session != null) {
+			session.disconnect();
+			Logger.log("Client session removed for user: " + user);
+		}
+		for (Set<String> subscribers : subscriptions.values()) {
+			subscribers.remove(user);
+		}
 		
 	}
 
 	public void createTopic(String topic) {
-
 		// TODO: create topic in the storage
-
-		throw new UnsupportedOperationException(TODO.method());
-	
+		subscriptions.putIfAbsent(topic, ConcurrentHashMap.newKeySet());
+		Logger.log("Topic created: " + topic);
+		Logger.log("Current topics: " + subscriptions.keySet());
 	}
 
 	public void deleteTopic(String topic) {
-
 		// TODO: delete topic from the storage
-
-		throw new UnsupportedOperationException(TODO.method());
-		
+		subscriptions.remove(topic);
+		Logger.log("Topic deleted: " + topic);
+		Logger.log("Current topics: " + subscriptions.keySet());
 	}
 
 	public void addSubscriber(String user, String topic) {
-
 		// TODO: add the user as subscriber to the topic
-		
-		throw new UnsupportedOperationException(TODO.method());
-		
+		subscriptions.putIfAbsent(topic, ConcurrentHashMap.newKeySet());
+		Set<String> subscribers = subscriptions.get(topic);
+		subscribers.add(user);
+		Logger.log("User " + user + " subscribed to topic " + topic);
+		Logger.log("Subscribers for " + topic + ": " + subscribers);
 	}
 
 	public void removeSubscriber(String user, String topic) {
-
 		// TODO: remove the user as subscriber to the topic
-
-		throw new UnsupportedOperationException(TODO.method());
+		Set<String> subscribers = subscriptions.get(topic);
+		if (subscribers != null) {
+			subscribers.remove(user);
+		}
+		Logger.log("User " + user + " unsubscribed to topic " + topic);
+		Logger.log("Subscribers for " + topic + ": " + subscribers);
 	}
 }

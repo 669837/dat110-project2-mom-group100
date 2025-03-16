@@ -10,9 +10,9 @@ public abstract class Message {
 		
 	}
 	
-	public Message(MessageType type, String user) {
-		this.type = type;
+	public Message(String user, MessageType type) {
 		this.user = user;
+		this.type = type;
 	}
 
 	public MessageType getType() { return this.type; }
